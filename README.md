@@ -31,4 +31,4 @@ This repository is intended for **academic evaluation and learning purposes**.
 ## Author
 
 **Dikshay Sharma**  
-B.Tech – Computer Science & Engineering
+B.E – Computer Science & Engineering
