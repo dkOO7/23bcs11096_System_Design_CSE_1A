@@ -2,7 +2,6 @@
 #include <queue>
 #include <vector>
 #include <string>
-#include <unordered_map>
 using namespace std;
 
 class Order {
@@ -29,9 +28,11 @@ private:
 public:
     void publishOrder(Order order) {
         orderQueue.push(order);
-        cout << "Order Published -> ID: " << order.orderId
+        cout << "\nOrder Published Successfully!\n";
+        cout << "Order ID: " << order.orderId
              << " | Customer: " << order.customerName
-             << " | Item: " << order.item << endl;
+             << " | Item: " << order.item
+             << " | Amount: " << order.amount << endl;
     }
 
     bool hasOrders() {
@@ -63,6 +64,7 @@ public:
 
     void showAcceptedOrders() {
         cout << "\n===== Accepted Orders =====\n";
+
         if (acceptedOrders.empty()) {
             cout << "No accepted orders yet.\n";
             return;
@@ -79,6 +81,7 @@ public:
 
     void showRejectedOrders() {
         cout << "\n===== Rejected Orders =====\n";
+
         if (rejectedOrders.empty()) {
             cout << "No rejected orders yet.\n";
             return;
@@ -92,31 +95,63 @@ public:
                  << " | Status: " << order.status << endl;
         }
     }
+
+    void showSummary() {
+        cout << "\n===== Dashboard Summary =====\n";
+        cout << "Total Accepted Orders: " << acceptedOrders.size() << endl;
+        cout << "Total Rejected Orders: " << rejectedOrders.size() << endl;
+    }
 };
 
 int main() {
     KafkaQueue kafkaTopic;
     Dashboard dashboard;
 
-    kafkaTopic.publishOrder(Order(101, "Dikshay", "Burger", 199));
-    kafkaTopic.publishOrder(Order(102, "Arjun", "Pizza", 349));
-    kafkaTopic.publishOrder(Order(103, "Rahul", "Pasta", 249));
-    kafkaTopic.publishOrder(Order(104, "Priya", "Biryani", 299));
+    int totalOrders;
+
+    cout << "Enter total number of orders to publish: ";
+    cin >> totalOrders;
+
+    for (int i = 0; i < totalOrders; i++) {
+        int id;
+        string customerName;
+        string item;
+        double amount;
+
+        cout << "\nEnter details for Order " << i + 1 << endl;
+
+        cout << "Enter Order ID: ";
+        cin >> id;
+
+        cin.ignore();
+
+        cout << "Enter Customer Name: ";
+        getline(cin, customerName);
+
+        cout << "Enter Food Item: ";
+        getline(cin, item);
+
+        cout << "Enter Amount: ";
+        cin >> amount;
+
+        kafkaTopic.publishOrder(Order(id, customerName, item, amount));
+    }
 
     while (kafkaTopic.hasOrders()) {
         Order currentOrder = kafkaTopic.consumeOrder();
 
-        cout << "\nNew Order Received:\n";
+        cout << "\n====================================\n";
+        cout << "New Order Received:\n";
         cout << "Order ID: " << currentOrder.orderId
              << " | Customer: " << currentOrder.customerName
              << " | Item: " << currentOrder.item
              << " | Amount: " << currentOrder.amount << endl;
 
-        int choice_Dikshay;
+        int choice;
         cout << "Enter 1 to Accept, 0 to Reject: ";
-        cin >> choice_Dikshay;
+        cin >> choice;
 
-        if (choice_Dikshay == 1) {
+        if (choice == 1) {
             dashboard.acceptOrder(currentOrder);
             cout << "Order Accepted Successfully!\n";
         } else {
@@ -125,6 +160,7 @@ int main() {
         }
     }
 
+    dashboard.showSummary();
     dashboard.showAcceptedOrders();
     dashboard.showRejectedOrders();
 
